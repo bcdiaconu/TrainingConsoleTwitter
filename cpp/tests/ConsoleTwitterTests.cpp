@@ -71,3 +71,14 @@ TEST_CASE("Bob's wall shows both Alice and Bob posts after Bob follows Alice") {
 
 	CHECK_EQ("Bob Wall\nAlice - Alice's message\nBob - Bob's message\n", output);
 }
+
+TEST_CASE("Bob's timeline shows only Bob posts after Bob follows Alice") {
+	ConsoleTwitter consoleTwitter;
+	consoleTwitter.sendInput("Alice -> Alice's message");
+	consoleTwitter.sendInput("Bob -> Bob's message");
+	consoleTwitter.sendInput("Bob follows Alice");
+
+	string output = consoleTwitter.sendInput("Bob");
+
+	CHECK_EQ("Bob Timeline\nBob's message\n", output);
+}
