@@ -4,4 +4,3 @@
 #include <string>
 
 std::list<std::string> sendInput(std::string command);
-	
