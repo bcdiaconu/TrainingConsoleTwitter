@@ -7,10 +7,32 @@
 #include <sstream>
 #include <algorithm>
 
+using UserName = std::string;
+using Message = std::string;
 
-std::string sendInput(const std::string& command);
+class Post{
+	public:
+		const UserName userName;
+		const Message message;
+		Post(const UserName userName, const Message message) : userName(userName), message(message){};
+};
 
-std::list<std::string> parseCommand(const std::string& command);
+using Posts = std::list<Post>;
+using string = std::string;
+using CommandParts = std::list<std::string>;
 
-std::string formatOutput(const std::string& userName, const std::string& header);
+class ConsoleTwitter{
+	private:
+		Posts posts;
+
+	public:
+		ConsoleTwitter() : posts(){};
+		string sendInput(const string& command);
+
+	private:
+		CommandParts parseCommand(const string& command);
+		string formatOutput(const UserName& userName, const string& header);
+		string formatOutput(const UserName& userName, const string& header, const Posts& posts);
+		Posts userPosts(const UserName& userName);
+};
 #endif

@@ -1,31 +1,30 @@
 #include "ConsoleTwitter.h"
-#include <functional>
+#include <algorithm>
 
-std::list<std::string> posts;
-
-std::string sendInput(const std::string& command){
+string ConsoleTwitter::sendInput(const string& command){
 	auto commandWords = parseCommand(command);
 
 	if(commandWords.size() == 1){
-		std::string userName = commandWords.front();
-		return formatOutput(userName, "Timeline");
+		auto userName = commandWords.front();
+		return formatOutput(userName, "Timeline", userPosts(userName));
 	}
 
-	if(commandWords.size() == 2){
-		std::string userName = commandWords.front();
-		std::string userCommand = commandWords.back();
-		return formatOutput(userName, userCommand);
+	if(commandWords.size() == 2){ 
+		auto userName = commandWords.front();
+		auto userCommand = commandWords.back();
+		if(userCommand != "wall") return "Bad command '" + command + "'";
+		return formatOutput(userName, "Wall", userPosts(userName));
 	}
 
 	if(commandWords.size() >= 3){
-		std::string userName = commandWords.front();
+		auto userName = commandWords.front();
 		commandWords.pop_front();
 
-		std::string command = commandWords.front();
-		if(command != "->") return "Command error";
+		auto command = commandWords.front();
+		if(command != "->") return "Bad command '" + command + "'";
 		commandWords.pop_front();
 
-		std::string message;
+		string message;
 		for(auto commandWord = commandWords.begin(); commandWord != commandWords.end(); commandWord++){
 			if(commandWord == commandWords.begin()){
 				message += *commandWord;
@@ -34,7 +33,8 @@ std::string sendInput(const std::string& command){
 			}
 		}
 
-		posts.push_back(message);
+		Post post(userName, message);
+		posts.push_back(post);
 		std::ostringstream outputFormatter;
 		outputFormatter << userName << " posted message '" << message << "'" << std::endl;
 		return outputFormatter.str();
@@ -42,26 +42,37 @@ std::string sendInput(const std::string& command){
 	return "";
 }
 
-std::list<std::string> parseCommand(const std::string& command){
+CommandParts ConsoleTwitter::parseCommand(const std::string& command){
 	std::stringstream parser(command);
-	std::string word;
-	std::list<std::string> commandWords;
-	while(parser>>word){
-		commandWords.push_back(word);
+	string part;
+	CommandParts commandParts;
+	while(parser>>part){
+		commandParts.push_back(part);
 	}
-	return commandWords;
+	return commandParts;
 }
 
-std::string formatOutput(const std::string& userName, const std::string& header){
+
+string ConsoleTwitter::formatOutput(const UserName& userName, const string& header){
+	return formatOutput(userName, header, posts);
+}
+
+string ConsoleTwitter::formatOutput(const UserName& userName, const string& header, const Posts& posts){
 	std::ostringstream outputFormatter;
 	outputFormatter << userName << " " << header << std::endl;
 	if(posts.size() == 0){
 		outputFormatter << "No posts found" << std::endl;
 	} else {
 		for(auto post = posts.begin(); post != posts.end(); post++){
-			outputFormatter << *post << std::endl;
+			outputFormatter << post->message << std::endl;
 		}
 	}
 
 	return outputFormatter.str();
+}
+
+Posts ConsoleTwitter::userPosts(const UserName& userName){
+	Posts userPosts;
+	std::copy_if(std::begin(posts), std::end(posts), std::back_inserter(userPosts), [userName](Post& it){return it.userName == userName;});
+	return userPosts;
 }
