@@ -4,7 +4,7 @@ run: compile
 compile: out
 	g++ -std=c++20 -Isrc/ src/ConsoleTwitter.cpp src/Main.cpp -oout/consoleTwitter
 
-runTests: compileTests
+tests: compileTests
 	out/consoleTwitterTests
 
 compileTests: out
