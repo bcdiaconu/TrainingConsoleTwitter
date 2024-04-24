@@ -1,4 +1,4 @@
-namespace ConsoleTwitter;
+namespace ConsoleTwitter.Posts;
 
 class Post
 {

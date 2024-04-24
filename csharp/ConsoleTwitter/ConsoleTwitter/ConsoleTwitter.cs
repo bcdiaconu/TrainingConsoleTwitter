@@ -4,8 +4,8 @@ using System.Linq;
 
 public class ConsoleTwitter
 {
-    Posts posts = new Posts();
-    Dictionary<string, Users> followed = new Dictionary<string, Users>();
+    Posts.PostsCollection postsCollection= new Posts.PostsCollection();
+    Dictionary<string, Posts.Users> followed = new Dictionary<string, Posts.Users>();
 
     public string sendInput(string command)
     {
@@ -13,8 +13,7 @@ public class ConsoleTwitter
 
         if (commandWords.Count == 1)
         {
-            var userName = commandWords.First();
-            return formatOutput(userName, "Timeline", userPosts(userName), false);
+            return new Commands.ShowUserTimelineCommand(postsCollection,commandWords).Execute();
         }
 
         if (commandWords.Count == 2)
@@ -39,8 +38,8 @@ public class ConsoleTwitter
             {
                 commandWords.RemoveAt(0);
                 string message = String.Join(" ", commandWords);
-                Post post = new Post(userName, message);
-                posts.Add(post);
+                var post = new Posts.Post(userName, message);
+                postsCollection.Add(post);
                 return $"{userName} posted message '{message}'\n";
             }
 
@@ -50,7 +49,7 @@ public class ConsoleTwitter
                 string whoToFollow = commandWords.First();
                 if (!followed.ContainsKey(userName))
                 {
-                    followed.Add(userName, new Users());
+                    followed.Add(userName, new Posts.Users());
                 }
                 followed[userName].Add(whoToFollow);
                 return $"{userName} is now following {whoToFollow}\n";
@@ -59,17 +58,17 @@ public class ConsoleTwitter
         return $"Bad command '{command}'";
     }
 
-    private CommandParts parseCommand(string command)
+    private Posts.CommandParts parseCommand(string command)
     {
-        return new CommandParts(command.Split(' '));
+        return new Posts.CommandParts(command.Split(' '));
     }
 
     private string formatOutput(string userName, string header)
     {
-        return formatOutput(userName, header, this.posts, false);
+        return formatOutput(userName, header, postsCollection.GetPosts(), false);
     }
 
-    private string formatOutput(string userName, string header, Posts posts, bool withUser)
+    private string formatOutput(string userName, string header, Posts.Posts posts, bool withUser)
     {
         if (posts.Count == 0)
         {
@@ -92,15 +91,15 @@ public class ConsoleTwitter
         }
     }
 
-    Posts userPosts(string userName)
+    Posts.Posts userPosts(string userName)
     {
-        return new Posts(posts.Where(it => it.UserName == userName));
+        return new Posts.Posts(postsCollection.GetPosts().Where(it => it.UserName == userName));
     }
 
-    Posts userAndFollowedPosts(string userName)
+    Posts.Posts userAndFollowedPosts(string userName)
     {
-        return new Posts(
-            posts.Where(it => it.UserName == userName || followed[userName].Contains(it.UserName))
+        return new Posts.Posts(
+            postsCollection.GetPosts().Where(it => it.UserName == userName || followed[userName].Contains(it.UserName))
         );
     }
 }
