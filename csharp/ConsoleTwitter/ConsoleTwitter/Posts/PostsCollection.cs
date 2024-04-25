@@ -16,4 +16,11 @@ internal class PostsCollection
 
     internal Posts FilterUserPosts(string userName)
     => new Posts(_posts.Where(it => it.UserName == userName));
+
+    internal Posts userAndFollowedPosts(string userName)
+    {
+        return new Posts(
+            _posts.Where(it => it.UserName == userName || followed[userName].Contains(it.UserName))
+        );
+    }
 }

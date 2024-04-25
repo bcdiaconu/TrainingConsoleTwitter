@@ -1,11 +1,14 @@
 namespace ConsoleTwitter;
 
 using System.Linq;
+using System.Collections.Generic;
+using Commands;
 
 public class ConsoleTwitter
 {
     Posts.PostsCollection postsCollection= new Posts.PostsCollection();
     Dictionary<string, Posts.Users> followed = new Dictionary<string, Posts.Users>();
+    Queue<ICommand> history = new Queue<ICommand>();
 
     public string sendInput(string command)
     {
@@ -13,16 +16,16 @@ public class ConsoleTwitter
 
         if (commandWords.Count == 1)
         {
-            return new Commands.ShowUserTimelineCommand(postsCollection,commandWords).Execute();
+            Commands.ShowUserTimelineCommand timelineCommand = new Commands.ShowUserTimelineCommand(postsCollection,commandWords);
+            history.Enqueue(timelineCommand);
+            return timelineCommand.Execute();
         }
 
         if (commandWords.Count == 2)
         {
-            var userName = commandWords.First();
-            var userCommand = commandWords.Last();
-            if (userCommand != "wall")
-                return "Bad command '" + command + "'";
-            return formatOutput(userName, "Wall", userAndFollowedPosts(userName), true);
+            Commands.ShowUserWall userWallCommand = new Commands.ShowUserWall(postsCollection,commandWords);
+            history.Enqueue(userWallCommand);
+            return userWallCommand.Execute();
         }
 
         if (commandWords.Count >= 3)
